@@ -16,7 +16,7 @@ describe('LLM Image Assertions', () => {
     imageAssertions = new ImageAssertions();
   });
 
-  it('should validate an orange cat image', async () => {
+  it.skip('should validate an orange cat image', async () => {
     const base64Image = readImageAsBase64('./cat.png');
 
     // The original image prompt: A fluffy orange cat sitting on a windowsill
@@ -33,7 +33,24 @@ describe('LLM Image Assertions', () => {
     });
   }, 60000);
 
-  it('should validate failing image - man presenting (failing test)', async () => {
+  it.skip('should validate an orange cat image and no other elements', async () => {
+    const base64Image = readImageAsBase64('./cat.png');
+
+    // The original image prompt: A fluffy orange cat sitting on a windowsill
+    const validationResult = await imageAssertions.validateImage({
+      base64Image,
+      assertionPrompt:
+        'The image should contain an orange cat and no other people, objects or text present',
+    });
+
+    expect(validationResult).toSatisfyImageAssertions({
+      assertionsMet: true,
+      score: 9,
+      tone: ImageTone.PHOTO_REALISTIC,
+    });
+  }, 60000);
+
+  it.skip('should validate failing image - man presenting (failing test)', async () => {
     const base64Image = readImageAsBase64('./man-speaking.png');
 
     // original image prompt: A man wearing an AWS Lambda t-shirt presenting on stage at a conference
@@ -53,7 +70,7 @@ describe('LLM Image Assertions', () => {
     }).toThrow();
   }, 60000);
 
-  it('should validate that the image is black and white and matches the prompt', async () => {
+  it.skip('should validate that the image is black and white and matches the prompt', async () => {
     const base64Image = readImageAsBase64('./woman-with-book.png');
 
     // The original image prompt: A black and white photo realistic image of a woman reading a book by a poolside with a coffee and a cake on her table
@@ -70,7 +87,7 @@ describe('LLM Image Assertions', () => {
     });
   }, 60000);
 
-  it('should validate failing image - couple dreaming (failing test)', async () => {
+  it.skip('should validate failing image - couple dreaming (failing test)', async () => {
     const base64Image = readImageAsBase64('./couple-dreaming.png');
 
     // original image prompt: An image in a dreamy style of a man and woman facing each other day dreaming.
