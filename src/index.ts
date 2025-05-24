@@ -14,7 +14,6 @@ import { expect } from '@jest/globals';
  * Enum for image tone classifications.
  */
 export enum ImageTone {
-  NEUTRAL = 'neutral',
   DREAMY = 'dreamy',
   PHOTO_REALISTIC = 'photo-realistic',
   BLACK_AND_WHITE = 'black-and-white',
@@ -26,7 +25,7 @@ export enum ImageTone {
 export interface ImageGenerationInput {
   /** The description of the image to be generated */
   prompt: string;
-  /** The Bedrock model ID to use (defaults to amazon.titan-image-generator-v1:0) */
+  /** The Bedrock model ID to use (defaults to amazon.titan-image-generator-v2:0) */
   modelId?: string;
   /** The AWS region where the Bedrock model is hosted (defaults to us-east-1) */
   region?: string;
@@ -36,8 +35,8 @@ export interface ImageGenerationInput {
     width?: number;
     /** Image height (defaults to 1024) */
     height?: number;
-    /** Image quality (LOW, STANDARD, PREMIUM - defaults to PREMIUM) */
-    quality?: 'LOW' | 'STANDARD' | 'PREMIUM';
+    /** Image quality (standard, premium - defaults to premium) */
+    quality?: 'standard' | 'premium';
     /** CFG Scale for prompt adherence (1.0 to 10.0, defaults to 8.0) */
     cfgScale?: number;
     /** Random seed for reproducibility */
@@ -120,12 +119,11 @@ export class ImageAssertions {
   ): Promise<ImageGenerationResult> {
     const {
       prompt,
-      modelId = 'amazon.titan-image-generator-v1:0',
+      modelId = 'amazon.titan-image-generator-v2:0',
       region = this.region,
       imageConfig = {},
     } = options;
 
-    // Create new client if different region specified
     const client =
       region === this.region
         ? this.bedrock
@@ -177,7 +175,6 @@ export class ImageAssertions {
         throw new Error('No images returned from model');
       }
 
-      // Get the base64 image from the response
       const base64Image = responseBody.images[0];
 
       if (!base64Image) {
@@ -244,6 +241,11 @@ SCORING GUIDELINES:
 TONE CLASSIFICATION:
 The "tone" must be one of: ${Object.values(ImageTone).join(', ')}
 
+Definitions:
+- "dreamy": surreal, soft, ethereal atmosphere; may appear otherworldly or hazy, not sharp or high contrast. Suitable for styles that evoke a calm or fantastical feeling.
+- "photo-realistic": highly detailed and mimics real-world photography.
+- "black-and-white": grayscale image with no color, may vary in tone depending on contrast and texture.
+
 Evaluate the image against this assertion:
 "${assertionPrompt}"
 
@@ -303,7 +305,6 @@ IMPORTANT: "assertionsMet" should be true only if all key details in the asserti
 
     const result = JSON.parse(jsonMatch[0].trim());
 
-    // Apply confidence threshold
     const assertionsMet =
       result.score >= confidenceThreshold && result.assertionsMet;
 

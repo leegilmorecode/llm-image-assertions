@@ -9,12 +9,7 @@ const readImageAsBase64 = (filename: string): string => {
   return imageBuffer.toString('base64');
 };
 
-// Image prompts for reference:
-// image1.png: A fluffy orange cat sitting on a windowsill
-// image2.png: A man wearing an AWS Lambda t-shirt presenting on stage at a conference
-// image3.png: A black and white photo realistic image of a woman reading a book by a poolside with a coffee and a cake on her table
-
-describe.skip('LLM Image Assertions', () => {
+describe('LLM Image Assertions', () => {
   let imageAssertions: ImageAssertions;
 
   beforeAll(() => {
@@ -74,4 +69,56 @@ describe.skip('LLM Image Assertions', () => {
       tone: ImageTone.BLACK_AND_WHITE,
     });
   }, 60000);
+
+  it('should validate failing image - couple dreaming (failing test)', async () => {
+    const base64Image = readImageAsBase64('./couple-dreaming.png');
+
+    // original image prompt: An image in a dreamy style of a man and woman facing each other day dreaming.
+    // They both have thought bubbles above their heads thinking about different style cars.
+    const validationResult = await imageAssertions.validateImage({
+      base64Image,
+      assertionPrompt:
+        'The image should contain a man and woman together day dreaming',
+    });
+
+    // These assertions should fail since the image doesn't match the assertion
+    expect(() => {
+      expect(validationResult).toSatisfyImageAssertions({
+        assertionsMet: true,
+        score: 8,
+        tone: ImageTone.PHOTO_REALISTIC, // it is a dreamy style image
+      });
+    }).toThrow();
+  }, 60000);
+
+  it.skip('should generate and validate an image in one flow', async () => {
+    const imagePrompt =
+      'A dreamy style image of a person sitting under a cherry blossom tree reading a book';
+    const assertionPrompt =
+      'The image should show a person under a cherry blossom tree in a dreamy style reading a book';
+
+    // Generate the image
+    const generationResult = await imageAssertions.generateImage({
+      modelId: 'amazon.titan-image-generator-v2:0',
+      prompt: imagePrompt,
+      imageConfig: {
+        quality: 'premium',
+        width: 512,
+        height: 512,
+      },
+    });
+
+    // Validate the generated image
+    const validationResult = await imageAssertions.validateImage({
+      base64Image: generationResult.base64Image,
+      assertionPrompt,
+    });
+
+    // Assert that the validation result is strong and dreamy
+    expect(validationResult).toSatisfyImageAssertions({
+      assertionsMet: true,
+      score: 8,
+      tone: ImageTone.DREAMY,
+    });
+  }, 90000);
 });
